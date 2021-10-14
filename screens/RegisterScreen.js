@@ -1,22 +1,43 @@
-import React, {useState} from "react";
+import React, {useState, useEffect} from "react";
 import {View, Text, StyleSheet} from "react-native";
 import {TextInput, Title, Button} from "react-native-paper";
 
+// grab firebase functions
+import {auth} from "../api/firebase";
+
 //constant
-import { primary } from './../constants/Colors';
+import {primary} from "./../constants/Colors";
 
 const RegisterScreen = ({navigation}) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [name, setName] = useState('');
-  const [img, setImg] = useState('') //avatar
+  const [name, setName] = useState("");
+  const [img, setImg] = useState(""); //avatar
+  const [error, setError] = useState(); //error message from firebase
+
+  useEffect(() => {
+    // cleanup
+    return () => {
+      setError();
+    };
+  }, []);
+
+  // register function
+  const register = () => {
+    auth
+      .createUserWithEmailAndPassword(email, password)
+      .then(res => {
+        console.log(res);
+      })
+      .catch(error => setError(error.message));
+  };
 
   return (
     <View style={styles.container}>
       <Title style={styles.mainTitle}>Register</Title>
       {/* textfields */}
       <View style={{margin: 20}}>
-      <TextInput
+        <TextInput
           value={name}
           label="Name"
           placeholder="Please enter your name"
@@ -43,7 +64,9 @@ const RegisterScreen = ({navigation}) => {
           style={{backgroundColor: primary, margin: 2}}
           //   theme={{colors: {primary: "white", underlineColor: "white"}}}
         />
-        <Button mode="contained" style={{marginTop: 15}}>
+        {/* if error exists, show that */}
+        {error ? <Text style={{textAlign: 'center', color: 'red'}}>{error}</Text> : null}
+        <Button onPress={register} mode="contained" style={{marginTop: 15}}>
           Register
         </Button>
         <Button
